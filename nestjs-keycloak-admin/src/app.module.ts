@@ -1,45 +1,33 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './controllers/app.controller';
 import { AppService } from './services/app.service';
-import { KeycloakService } from './services/keycloak.service';
 import { ConfigModule } from '@nestjs/config';
-import {
-  ResourceGuard,
-  RoleGuard,
-  AuthGuard,
-  KeycloakConnectModule,
-} from 'nest-keycloak-connect';
-import { APP_GUARD } from '@nestjs/core';
+import { UserModule } from './user/user.module';
+
+console.log('build environment is '+process.env.build);
+
+async function getEnvFilePath(argv: any): Promise<string> {
+  const envFile = argv['env'] || 'development';
+  return `.env.${envFile}`;
+}
+
+console.log(process.env);
 
 /**
  * The `AppModule` class is a module in a NestJS application that is responsible for configuring and organizing the application's components, such as controllers and services. It also handles the integration with Keycloak for authentication and authorization.
  */
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    // KeycloakConnectModule.register({
-    //   authServerUrl: 'http://localhost:8080',
-    //   realm: 'test',
-    //   clientId: 'admin-cli',
-    //   secret: 'X74waPQBYuEg7iHRmd8BR7qJPZ6Pdld4', 
-    // }),
+    ConfigModule.forRoot({envFilePath: 'environments/local.env', isGlobal: true}),
+    /*ConfigModule.forRoot({
+      useFactory: getEnvFilePath,
+      inject: [process.argv],
+    }),*/
+    UserModule
   ],
   controllers: [AppController],
   providers: [
-    AppService,
-    KeycloakService,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthGuard,
-    // },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ResourceGuard,
-    // },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: RoleGuard,
-    // }
+    AppService
   ],
 })
 export class AppModule {}
